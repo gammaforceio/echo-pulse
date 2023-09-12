@@ -1,4 +1,4 @@
-module github.com/SiirRandall/echo-pulse
+module github.com/gammaforceio/echo-pulse
 
 go 1.21.0
 

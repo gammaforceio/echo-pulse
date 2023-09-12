@@ -4,9 +4,9 @@ import (
 	//"flag"
 	"fmt"
 
-	"github.com/SiirRandall/echo-pulse/config"
-	"github.com/SiirRandall/echo-pulse/logger"
-	"github.com/SiirRandall/echo-pulse/server"
+	"github.com/gammaforceio/echo-pulse/config"
+	"github.com/gammaforceio/echo-pulse/logger"
+	"github.com/gammaforceio/echo-pulse/server"
 	flag "github.com/spf13/pflag"
 )
 

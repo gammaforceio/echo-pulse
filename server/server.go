@@ -5,7 +5,7 @@ import (
 	"net"
 	"strings"
 
-	"github.com/SiirRandall/echo-pulse/logger"
+	"github.com/gammaforceio/echo-pulse/logger"
 )
 
 type UDPEchoServer struct {
