@@ -22,13 +22,12 @@
    git clone https://github.com/SiirRandall/echo-pulse.git
    cd echo-pulse
    ```
-   
-   ## Installation
 
 2. **Run the Installation Script**:
    ```bash
    sudo ./install.sh
    ```
+
 3. **Configure the Service:**
   - Edit the configuration file located at `/etc/echopulse/config.conf` to your needs.
   - The default configuration should work for most setups.
@@ -37,17 +36,18 @@
    ```bash
    sudo systemctl start echo-pulse.service
    ``` 
+
 5. **Optional) Enable Auto-Start at Boot:**
    ```bash
     sudo systemctl enable echo-pulse.service
     ```
-    ## Uninstallation
+## Uninstallation
 
-    To remove `echo-pulse`, simply run the provided uninstall script:
-    ```bash
-    sudo ./uninstall.sh
-    ```
-    ## Logging
+To remove `echo-pulse`, simply run the provided uninstall script:
+```bash
+sudo ./uninstall.sh
+```
+## Logging
 
-    You can access the logs in the defult location `/var/logs/echopuls/` 
-    This can be changed in `/etc/echopulse/config.conf`
+You can access the logs in the defult location `/var/logs/echopuls/` 
+This can be changed in `/etc/echopulse/config.conf`
