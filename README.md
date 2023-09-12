@@ -24,21 +24,21 @@
    ```
 
 2. **Run the Installation Script**:
-   ```bash
-   sudo ./install.sh
-   ```
+    ```bash
+    sudo ./install.sh
+    ```
 
 3. **Configure the Service:**
-  - Edit the configuration file located at `/etc/echopulse/config.conf` to your needs.
-  - The default configuration should work for most setups.
+    - Edit the configuration file located at `/etc/echopulse/config.conf` to your needs.
+    - The default configuration should work for most setups.
 
 4. **Start the Service**
-   ```bash
-   sudo systemctl start echo-pulse.service
-   ``` 
+    ```bash
+    sudo systemctl start echo-pulse.service
+    ``` 
 
 5. **Optional) Enable Auto-Start at Boot:**
-   ```bash
+    ```bash
     sudo systemctl enable echo-pulse.service
     ```
 ## Uninstallation
@@ -49,5 +49,12 @@ sudo ./uninstall.sh
 ```
 ## Logging
 
-You can access the logs in the defult location `/var/logs/echopuls/` 
+You can access the logs in the default location `/var/logs/echopuls/` 
 This can be changed in `/etc/echopulse/config.conf`
+
+## Contributing
+
+Interested in contributing? Please fork the repository and use a feature branch. All pull requests are welcome!
+
+## Licensing
+This project is licensed under the GNU General Public License, version 2 License. See the LICENSE file for more details.
