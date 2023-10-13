@@ -1,94 +1,135 @@
-// This is the server package
 package server
 
-// Import necessary packages and libraries
 import (
-	"fmt"     // For printing to console
-	"net"     // To handle networking aspects
-	"strings" // To manipulate strings
+	"fmt"
+	"net"
+	"strings"
 
-	"github.com/gammaforceio/echo-pulse/logger" // To log errors in a log file
+	"github.com/gammaforceio/echo-pulse/logger"
 )
 
-// UDPEchoServer encapsulates the properties needed for the echo server
-type UDPEchoServer struct {
+type EchoServer struct {
 	LogDir    string              // directory to save log files
 	UniqueIPs map[string]struct{} // holds unique IPs connected to the server
 	Blacklist []string            // list of blacklisted keywords
 }
 
-// NewUDPEchoServer returns a new instance of a UDP echo server
-func NewUDPEchoServer(logDir string, blacklist []string) *UDPEchoServer {
-	return &UDPEchoServer{
+func NewEchoServer(logDir string, blacklist []string) *EchoServer {
+	return &EchoServer{
 		LogDir:    logDir,
-		UniqueIPs: make(map[string]struct{}), // Initialize UniqueIPs as an empty map
+		UniqueIPs: make(map[string]struct{}),
 		Blacklist: blacklist,
 	}
 }
 
-// Start begins to start listening on given IP and port
-func (s *UDPEchoServer) Start(ip string, port int) {
-	// Format the address using provided IP and port
+func (s *EchoServer) StartUDP(ip string, port int) {
 	addr := fmt.Sprintf("%s:%d", ip, port)
 
-	// Resolve UDP address
 	udpAddr, err := net.ResolveUDPAddr("udp", addr)
 	if err != nil {
-		fmt.Println("Failed to resolve address:", err) // print error if unable to resolve address
+		fmt.Println("Failed to resolve UDP address:", err)
 		return
 	}
 
-	// Begin listening on the resolved UDP address
 	conn, err := net.ListenUDP("udp", udpAddr)
 	if err != nil {
-		fmt.Println("Failed to start server:", err) // print error if unable to start the server
+		fmt.Println("Failed to start UDP server:", err)
 		return
 	}
-	defer conn.Close() // Close the connection when function exits
+	defer conn.Close()
 
 	fmt.Printf("Listening on %s for UDP packets...\n", addr)
 
-	buf := make([]byte, 1024) // Create a buffer to hold incoming data
+	buf := make([]byte, 1024)
 	for {
-		// Read from the UDP connection
 		n, clientAddr, err := conn.ReadFromUDP(buf)
 		if err != nil {
-			fmt.Println("Error reading:", err) // print error if unable to read data
+			fmt.Println("Error reading from UDP:", err)
 			continue
 		}
 
 		clientData := strings.ReplaceAll(string(buf[:n]), "\n", "")
 
-		// Check if data contains any blacklisted keywords
-		blacklisted := false
-		for _, keyword := range s.Blacklist {
-			if strings.Contains(clientData, keyword) {
-				blacklisted = true
-				break
-			}
-		}
-
-		// If data contains blacklisted keywords, do not process this packet.
-		if blacklisted {
+		if s.isBlacklisted(clientData) {
 			continue
 		}
 
-		// Log the received data from the client
 		logger.LogToFile(
 			s.LogDir,
 			"udp_all_traffic.log",
 			fmt.Sprintf("Received from %s: %s\n", clientAddr, clientData),
 		)
 
-		// Check if the client's IP is unique and log it if it is
 		if _, exists := s.UniqueIPs[clientAddr.IP.String()]; !exists {
 			s.UniqueIPs[clientAddr.IP.String()] = struct{}{}
-
-			// Logs the unique IP
 			logger.LogToFile(s.LogDir, "unique_ips.log", clientAddr.IP.String()+"\n")
 		}
 
-		// Echo the data back to the client
 		conn.WriteToUDP(buf[:n], clientAddr)
 	}
+}
+
+func (s *EchoServer) StartTCP(ip string, port int) {
+	addr := fmt.Sprintf("%s:%d", ip, port)
+
+	listener, err := net.Listen("tcp", addr)
+	if err != nil {
+		fmt.Println("Failed to start TCP server:", err)
+		return
+	}
+	defer listener.Close()
+
+	fmt.Printf("Listening on %s for TCP connections...\n", addr)
+
+	for {
+		conn, err := listener.Accept()
+		if err != nil {
+			fmt.Println("Error accepting connection:", err)
+			continue
+		}
+
+		go s.handleTCPConnection(conn)
+	}
+}
+
+func (s *EchoServer) handleTCPConnection(conn net.Conn) {
+	defer conn.Close()
+
+	buf := make([]byte, 1024)
+	for {
+		n, err := conn.Read(buf)
+		if err != nil {
+			fmt.Println("Error reading from TCP:", err)
+			break
+		}
+
+		clientData := strings.ReplaceAll(string(buf[:n]), "\n", "")
+
+		if s.isBlacklisted(clientData) {
+			continue
+		}
+
+		logger.LogToFile(
+			s.LogDir,
+			"tcp_all_traffic.log",
+			fmt.Sprintf("Received from %s: %s\n", conn.RemoteAddr(), clientData),
+		)
+
+		ip := conn.RemoteAddr().(*net.TCPAddr).IP.String()
+		if _, exists := s.UniqueIPs[ip]; !exists {
+			s.UniqueIPs[ip] = struct{}{}
+			logger.LogToFile(s.LogDir, "unique_ips.log", ip+"\n")
+		}
+
+		conn.Write(buf[:n])
+	}
+}
+
+func (s *EchoServer) isBlacklisted(data string) bool {
+	for _, keyword := range s.Blacklist {
+		if strings.Contains(data, keyword) {
+			return true
+		}
+	}
+	return false
 }

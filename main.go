@@ -35,8 +35,9 @@ func main() {
 	}
 
 	// Creates a new UDP echo server with provided log directory and blacklist keywords
-	udpServer := server.NewUDPEchoServer(cfg.Log.Directory, cfg.Blacklist.Keywords)
-
+	//	udpServer := server.NewUDPEchoServer(cfg.Log.Directory, cfg.Blacklist.Keywords)
+	udpServer := server.NewEchoServer(cfg.Log.Directory, cfg.Blacklist.Keywords)
 	// Start to listen on given IP and port
-	udpServer.Start(cfg.Server.IP, cfg.Server.Port)
+	udpServer.StartUDP(cfg.Server.IP, cfg.Server.Port)
+	udpServer.StartTCP(cfg.Server.IP, cfg.Server.Port)
 }
